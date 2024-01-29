@@ -3,6 +3,7 @@ import 'package:fyp/screens/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fyp/service/auth.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -32,8 +33,8 @@ class _SignUpState extends State<SignUp> {
           style: TextStyle(fontSize: 20.0),
         )));
         // ignore: use_build_context_synchronously
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const LogIn()));
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -198,20 +199,30 @@ class _SignUpState extends State<SignUp> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    "assets/googlelogo.png",
-                    height: 45,
-                    width: 45,
-                    fit: BoxFit.cover,
+                  GestureDetector(
+                    onTap: () {
+                      AuthMethods().signInWithGoogle(context);
+                    },
+                    child: Image.asset(
+                      "assets/googlelogo.png",
+                      height: 45,
+                      width: 45,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(
                     width: 30.0,
                   ),
-                  Image.asset(
-                    "assets/applelogo.png",
-                    height: 50,
-                    width: 50,
-                    fit: BoxFit.cover,
+                  GestureDetector(
+                    onTap: () {
+                      AuthMethods().signInWithApple();
+                    },
+                    child: Image.asset(
+                      "assets/applelogo.png",
+                      height: 50,
+                      width: 50,
+                      fit: BoxFit.cover,
+                    ),
                   )
                 ],
               ),

@@ -4,6 +4,7 @@ import 'package:fyp/screens/forgot_password.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fyp/service/auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LogIn extends StatefulWidget {
   const LogIn({super.key});
@@ -134,10 +135,10 @@ class _LogInState extends State<LogIn> {
                             decoration: BoxDecoration(
                                 color: const Color(0xFF273671),
                                 borderRadius: BorderRadius.circular(30)),
-                            child: const Center(
+                            child: Center(
                                 child: Text(
-                              "Sign In",
-                              style: TextStyle(
+                              "Log In",
+                              style: GoogleFonts.ubuntu(
                                   color: Colors.white,
                                   fontSize: 22.0,
                                   fontWeight: FontWeight.w500),
@@ -155,21 +156,21 @@ class _LogInState extends State<LogIn> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ForgotPassword()));
+                          builder: (context) => const ForgotPassword()));
                 },
-                child: const Text("Forgot Password?",
-                    style: TextStyle(
-                        color: Color(0xFF8c8e98),
+                child: Text("Forgot Password?",
+                    style: GoogleFonts.ubuntu(
+                        color: const Color(0xFF8c8e98),
                         fontSize: 18.0,
                         fontWeight: FontWeight.w500)),
               ),
               const SizedBox(
                 height: 40.0,
               ),
-              const Text(
+              Text(
                 "or LogIn with",
-                style: TextStyle(
-                    color: Color(0xFF273671),
+                style: GoogleFonts.ubuntu(
+                    color: const Color(0xFF273671),
                     fontSize: 22.0,
                     fontWeight: FontWeight.w500),
               ),
@@ -212,9 +213,9 @@ class _LogInState extends State<LogIn> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account?",
-                      style: TextStyle(
-                          color: Color(0xFF8c8e98),
+                  Text("Don't have an account?",
+                      style: GoogleFonts.ubuntu(
+                          color: const Color(0xFF8c8e98),
                           fontSize: 18.0,
                           fontWeight: FontWeight.w500)),
                   const SizedBox(
@@ -222,13 +223,15 @@ class _LogInState extends State<LogIn> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => SignUp()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SignUp()));
                     },
-                    child: const Text(
+                    child: Text(
                       "SignUp",
-                      style: TextStyle(
-                          color: Color(0xFF273671),
+                      style: GoogleFonts.ubuntu(
+                          color: const Color(0xFF273671),
                           fontSize: 20.0,
                           fontWeight: FontWeight.w500),
                     ),

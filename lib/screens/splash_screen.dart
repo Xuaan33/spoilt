@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fyp/screens/home_screen.dart';
+import 'package:fyp/screens/login.dart';
 import 'package:fyp/screens/signup.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -20,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     Future.delayed(const Duration(seconds: 5), () {
       Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (_) => const SignUp(),
+        builder: (_) => const LogIn(),
       ));
     });
   }
@@ -39,7 +40,10 @@ class _SplashScreenState extends State<SplashScreen>
         width: double.infinity,
         decoration: const BoxDecoration(
             gradient: LinearGradient(
-          colors: [Color.fromARGB(255, 51, 105, 30), Colors.yellow],
+          colors: [
+            Color.fromARGB(255, 26, 59, 13),
+            Color.fromARGB(255, 255, 241, 112)
+          ],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         )),
@@ -53,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             const SizedBox(height: 5),
             Text(
-              'Makan.io',
+              'SPOILT',
               style: GoogleFonts.ubuntu(
                   color: Colors.black,
                   fontSize: 32,
@@ -65,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
               style: GoogleFonts.ubuntu(
                   color: Colors.white,
                   fontSize: 28,
-                  fontWeight: FontWeight.w400),
+                  fontWeight: FontWeight.w500),
             ),
           ],
         ),
