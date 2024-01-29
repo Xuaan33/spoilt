@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "966581707901",
+    "project_id": "spoilt-18e2a",
+    "storage_bucket": "spoilt-18e2a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:966581707901:android:f01235ded57eaa941d7d14",
+        "android_client_info": {
+          "package_name": "com.example.fyp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvuE2MoeyRhOYr9x8uAY9ueuOMK7VDAgs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
