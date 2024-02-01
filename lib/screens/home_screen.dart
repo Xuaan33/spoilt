@@ -1,8 +1,13 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fyp/bottom_nav_bar.dart';
+import 'package:fyp/screens/food_ar.dart';
+import 'package:fyp/screens/history.dart';
+import 'package:fyp/screens/home_screen2.dart';
+import 'package:fyp/screens/nearby_news.dart';
+import 'package:fyp/screens/profile.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -12,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int selectedIndex = 2; // Set the index of the home icon
+  int selectedIndex = 2;
   DateTime? lastBackPressTime;
 
   @override
@@ -22,51 +27,43 @@ class _HomeScreenState extends State<HomeScreen> {
         return _onWillPop();
       },
       child: Scaffold(
-        bottomNavigationBar: Container(
-          color: Colors.black,
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-            child: GNav(
-              backgroundColor: Colors.black,
-              color: Colors.white,
-              activeColor: Colors.white,
-              tabBackgroundColor: Color.fromRGBO(50, 50, 50, 1),
-              gap: 8,
-              padding: EdgeInsets.all(16),
-              selectedIndex: selectedIndex, // Set the selectedIndex
-              tabs: const [
-                GButton(
-                  icon: Icons.camera_alt_outlined,
-                  text: 'Food AR',
-                ),
-                GButton(
-                  icon: Icons.history_rounded,
-                  text: 'History',
-                ),
-                GButton(
-                  icon: Icons.home,
-                ),
-                GButton(icon: Icons.map_sharp, text: 'Nearby News'),
-                GButton(icon: Icons.person, text: 'Profile'),
-              ],
-              onTabChange: (index) {
-                setState(() {
-                  selectedIndex =
-                      index; // Update the selectedIndex when tab changes
-                });
-              },
-            ),
-          ),
+        bottomNavigationBar: BottomNavigationBarWidget(
+          selectedIndex: selectedIndex,
+          onTabChange: (index) {
+            setState(() {
+              selectedIndex = index;
+            });
+          },
         ),
+        body: _buildBody(), // Add the body of your HomeScreen
       ),
     );
+  }
+
+  Widget _buildBody() {
+    // Implement the body of your HomeScreen here
+    // You can use IndexedStack or Navigator to switch between screens based on the selectedIndex
+    // Example:
+    switch (selectedIndex) {
+      case 0:
+        return FoodAR();
+      case 1:
+        return History();
+      case 2:
+        return HomeScreen2();
+      case 3:
+        return NearbyNews();
+      case 4:
+        return Profile();
+      default:
+        return HomeScreen2(); // Default case
+    }
   }
 
   Future<bool> _onWillPop() async {
     DateTime now = DateTime.now();
     if (lastBackPressTime == null ||
-        now.difference(lastBackPressTime!) > Duration(seconds: 2)) {
+        now.difference(lastBackPressTime!) > const Duration(seconds: 2)) {
       lastBackPressTime = now;
       _showToast("Press again to exit");
       return false;

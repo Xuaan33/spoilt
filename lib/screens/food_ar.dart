@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 
 class FoodAR extends StatefulWidget {
   const FoodAR({super.key});
