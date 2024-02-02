@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fyp/screens/home_screen.dart';
-import 'package:fyp/screens/login.dart';
-import 'package:fyp/screens/signup.dart';
+import 'package:fyp/home_screen.dart';
+import 'package:fyp/login/sign/login.dart';
+import 'package:fyp/login/sign/signup.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {

@@ -1,4 +1,4 @@
-import 'package:fyp/screens/signup.dart';
+import 'package:fyp/login/sign/signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

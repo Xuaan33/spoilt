@@ -1,6 +1,6 @@
-import 'package:fyp/screens/home_screen.dart';
-import 'package:fyp/screens/signup.dart';
-import 'package:fyp/screens/forgot_password.dart';
+import 'package:fyp/home_screen.dart';
+import 'package:fyp/login/sign/signup.dart';
+import 'package:fyp/login/sign/forgot_password.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fyp/service/auth.dart';

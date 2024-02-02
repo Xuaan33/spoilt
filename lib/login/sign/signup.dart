@@ -1,5 +1,5 @@
-import 'package:fyp/screens/home_screen.dart';
-import 'package:fyp/screens/login.dart';
+import 'package:fyp/home_screen.dart';
+import 'package:fyp/login/sign/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

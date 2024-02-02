@@ -1,4 +1,4 @@
-import 'package:fyp/screens/home_screen.dart';
+import 'package:fyp/home_screen.dart';
 import 'package:fyp/service/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
