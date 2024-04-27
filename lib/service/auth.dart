@@ -38,12 +38,6 @@ class AuthMethods {
         "imgUrl": userDetails.photoURL,
         "id": userDetails.uid
       };
-      await DatabaseMethods()
-          .addUser(userDetails.uid, userInfoMap)
-          .then((value) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()));
-      });
     }
   }
 

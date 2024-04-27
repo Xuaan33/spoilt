@@ -4,7 +4,9 @@ import 'package:fyp/login/sign/forgot_password.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fyp/service/auth.dart';
+import 'package:fyp/service/database.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fyp/screens/setting_profile.dart';
 
 class LogIn extends StatefulWidget {
   const LogIn({super.key});
@@ -23,25 +25,74 @@ class _LogInState extends State<LogIn> {
 
   userLogin() async {
     try {
-      await FirebaseAuth.instance
+      UserCredential authResult = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+
+      User? firebaseUser = authResult.user;
+
+      // Check if the user's data exists in the database
+      bool userDataExists =
+          await DatabaseMethods().checkUserExists(firebaseUser!.uid);
+
+      if (!userDataExists) {
+        // Initialize name, birthDate, and selectedAllergies
+        String name = '';
+        DateTime? birthDate;
+        List<String> selectedAllergies = [];
+        String imgUrl = '';
+
+        // Combine authentication data with profile data
+        Map<String, dynamic> userData = {
+          'email': firebaseUser?.email,
+          'name': name,
+          'birthDate': birthDate,
+          'allergies': selectedAllergies,
+          'imgUrl': imgUrl,
+        };
+
+        // Check if any field in the userData map is not null or empty
+        bool anyFieldNotEmpty =
+            userData.values.any((value) => value != null && value != '');
+
+        if (anyFieldNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SettingsProfile()),
+          );
+        } else {
+          // Store combined user data in Firestore
+          await DatabaseMethods().addUser(firebaseUser.uid, userData);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      } else {
+        // User is not a new user, navigate to HomeScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
     } on FirebaseAuthException catch (e) {
+      // Handle authentication errors
       if (e.code == 'user-not-found') {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            backgroundColor: Colors.orangeAccent,
-            content: Text(
-              "No User Found for that Email",
-              style: TextStyle(fontSize: 18.0),
-            )));
+          backgroundColor: Colors.orangeAccent,
+          content: Text(
+            "No User Found for that Email",
+            style: TextStyle(fontSize: 18.0),
+          ),
+        ));
       } else if (e.code == 'wrong-password') {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            backgroundColor: Colors.orangeAccent,
-            content: Text(
-              "Wrong Password Provided by User",
-              style: TextStyle(fontSize: 18.0),
-            )));
+          backgroundColor: Colors.orangeAccent,
+          content: Text(
+            "Wrong Password Provided by User",
+            style: TextStyle(fontSize: 18.0),
+          ),
+        ));
       }
     }
   }

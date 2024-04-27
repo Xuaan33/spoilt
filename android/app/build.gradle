@@ -29,7 +29,7 @@ apply plugin:'kotlin-android'
 android {
     namespace "com.example.fyp"
     compileSdkVersion flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    //ndkVersion "21.3.6528147"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -42,6 +42,11 @@ android {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    aaptOptions {
+        noCompress 'tflite'
+        noCompress 'lite'
     }
 
     defaultConfig {
@@ -63,16 +68,30 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
         }
-    }
+    //     debug {
+    //         signingConfig signingConfigs.debug
+    //    }
+    //     profile {
+    //         signingConfig signingConfigs.debug
+    //     }
+    //    innerTest {
+    //         matchingFallbacks = ['debug', 'release']
+    //     }
+   }
+    
 }
 
 flutter {
     source '../..'
 }
 
+
+
 dependencies {
     implementation 'com.android.support:multidex:1.0.3'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation 'org.tensorflow:tensorflow-lite:2.8.0'
+    //implementation project(':flutter_unity_widget')
 }

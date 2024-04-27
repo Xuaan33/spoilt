@@ -41,8 +41,8 @@ class _SplashScreenState extends State<SplashScreen>
         decoration: const BoxDecoration(
             gradient: LinearGradient(
           colors: [
-            Color.fromARGB(255, 26, 59, 13),
-            Color.fromARGB(255, 255, 241, 112)
+            Color.fromARGB(255, 241, 255, 170),
+            Color.fromARGB(255, 255, 255, 255)
           ],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
@@ -51,25 +51,9 @@ class _SplashScreenState extends State<SplashScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/logo1.png',
+              'assets/iconSplash.png',
               width: 270,
               height: 270,
-            ),
-            const SizedBox(height: 5),
-            Text(
-              'SPOILT',
-              style: GoogleFonts.ubuntu(
-                  color: Colors.black,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Sedap Journey, Safe Bites',
-              style: GoogleFonts.ubuntu(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w500),
             ),
           ],
         ),

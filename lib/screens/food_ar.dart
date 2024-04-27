@@ -1,22 +1,199 @@
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:camera/camera.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+//import 'package:flutter_unity_widget/flutter_unity_widget.dart';
+import 'package:tflite_v2/tflite_v2.dart';
+
+List<CameraDescription>? cameras;
 
 class FoodAR extends StatefulWidget {
-  const FoodAR({super.key});
+  final Map<String, dynamic>? userData;
+  const FoodAR({super.key, this.userData});
 
   @override
   State<FoodAR> createState() => _FoodARState();
 }
 
 class _FoodARState extends State<FoodAR> {
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  CameraImage? cameraImage;
+  CameraController? cameraController;
+  String output = '';
+  bool isCapturing = false;
+  late User _currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    loadModel();
+    loadCamera();
+    _getCurrentUser();
+  }
+
+  Future<void> _getCurrentUser() async {
+    _currentUser = FirebaseAuth.instance.currentUser!;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Fyp"),
-      ),
-      body: const Center(
-        child: Text("Welcome to Food AR"),
+    return RepaintBoundary(
+      key: _scaffoldKey,
+      child: Scaffold(
+        body: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.7,
+                width: MediaQuery.of(context).size.width,
+                child: !cameraController!.value.isInitialized
+                    ? Container()
+                    : AspectRatio(
+                        aspectRatio: cameraController!.value.aspectRatio,
+                        child: CameraPreview(cameraController!),
+                      ),
+              ),
+            ),
+            Text(
+              output,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isCapturing)
+                    Text("Predicting in ${_countdown.toString()}..."),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isCapturing = true;
+                      });
+                      _startCountdown();
+                    },
+                    child: Text("OK"),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> loadCamera() async {
+    cameras = await availableCameras();
+    cameraController = CameraController(cameras![0], ResolutionPreset.medium);
+    await cameraController!.initialize();
+    if (mounted) {
+      setState(() {});
+    }
+    cameraController!.startImageStream((imageStream) {
+      if (isCapturing) {
+        cameraImage = imageStream;
+        runModel();
+      }
+    });
+  }
+
+  Future<void> runModel() async {
+    if (cameraImage != null) {
+      var prediction = await Tflite.runModelOnFrame(
+        bytesList: cameraImage!.planes.map((plane) {
+          return plane.bytes;
+        }).toList(),
+        imageHeight: cameraImage!.height,
+        imageWidth: cameraImage!.width,
+        imageMean: 127.5,
+        imageStd: 127.5,
+        rotation: 90,
+        numResults: 1,
+        threshold: 0.1,
+        asynch: true,
+      );
+      if (prediction != null && prediction.isNotEmpty) {
+        setState(() {
+          output = prediction[0]['label'];
+        });
+        sendPredictionToUnity(output); // Send the prediction to Unity
+      }
+    }
+  }
+
+  Future<void> loadModel() async {
+    await Tflite.loadModel(
+      model: "assets/model_unquant.tflite",
+      labels: "assets/labels.txt",
+    );
+  }
+
+  int _countdown = 3;
+
+  Future<void> _startCountdown() async {
+    for (int i = 3; i > 0; i--) {
+      setState(() {
+        _countdown = i;
+      });
+      await Future.delayed(Duration(seconds: 1));
+    }
+    await Future.wait([
+      //takeScreenshotAndSave(),
+      savePrediction(output),
+    ]);
+    setState(() {
+      isCapturing = false;
+      output = ''; // Reset the isCapturing flag after saving the prediction
+    });
+  }
+
+  // Future<void> takeScreenshotAndSave() async {
+  //   try {
+  //     final RenderRepaintBoundary? boundary = _scaffoldKey.currentContext
+  //         ?.findRenderObject() as RenderRepaintBoundary?;
+  //     if (boundary != null) {
+  //       final ui.Image image = await boundary.toImage();
+  //       final ByteData? byteData =
+  //           await image.toByteData(format: ui.ImageByteFormat.png);
+  //       final Uint8List buffer = byteData!.buffer.asUint8List();
+  //       final String timestamp =
+  //           DateTime.now().millisecondsSinceEpoch.toString();
+  //       final Reference storageReference = FirebaseStorage.instance
+  //           .ref()
+  //           .child('History')
+  //           .child('$timestamp.png');
+  //       await storageReference.putData(buffer);
+  //       // Save the final prediction to Firestore after taking the screenshot
+  //       print('Screenshot saved successfully.');
+  //     }
+  //   } catch (e) {
+  //     print('Error saving screenshot and prediction: $e');
+  //   }
+  // }
+
+  Future<void> savePrediction(String prediction) async {
+    try {
+      final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final Reference storageReference = FirebaseStorage.instance
+          .ref()
+          .child('History')
+          .child('$timestamp.txt');
+      await storageReference.putData(utf8.encode(
+          'Prediction: $prediction\nUserID: ${_currentUser.uid}\nTimestamp: $timestamp'));
+      print('Prediction saved successfully.');
+    } catch (e) {
+      print('Error saving prediction: $e');
+    }
+  }
+
+  void sendPredictionToUnity(String prediction) {
+    // final unityWidget = UnityWidgetController();
+    // unityWidget.postMessage('Food AR', 'prediction', prediction);
   }
 }

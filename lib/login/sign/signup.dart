@@ -67,7 +67,7 @@ class _SignUpState extends State<SignUp> {
                   width: MediaQuery.of(context).size.width,
                   height: 180,
                   child: Image.asset(
-                    "assets/signup.png",
+                    "assets/bgSign.jpg",
                     fit: BoxFit.cover,
                   )),
               const SizedBox(

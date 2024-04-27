@@ -1,28 +1,28 @@
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter/material.dart';
 import 'package:fyp/const.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
 class NearbyNews extends StatefulWidget {
-  const NearbyNews({super.key});
+  final Map<String, dynamic>? userData;
+  const NearbyNews({Key? key, this.userData}) : super(key: key);
 
   @override
   State<NearbyNews> createState() => _NearbyNewsState();
 }
 
 class _NearbyNewsState extends State<NearbyNews> {
-  Location _locationController = new Location();
-
+  Location _locationController = Location();
   final Completer<GoogleMapController> _mapController =
       Completer<GoogleMapController>();
   static const LatLng _pGooglePlex = LatLng(37.4223, -122.0848);
-  static const LatLng _pApplePark = LatLng(37.3346, -122.0090);
   LatLng? _currentP = null;
-
-  Map<PolygonId, Polyline> polylines = {};
 
   @override
   void initState() {
@@ -37,33 +37,77 @@ class _NearbyNewsState extends State<NearbyNews> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Nearby News',
+          style: GoogleFonts.ubuntu(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
       body: _currentP == null
-          ? const Center(
+          ? Center(
               child: Text("Loading..."),
             )
-          : GoogleMap(
-              onMapCreated: ((GoogleMapController controller) =>
-                  _mapController.complete(controller)),
-              initialCameraPosition: CameraPosition(
-                target: _pGooglePlex,
-                zoom: 13,
-              ),
-              markers: {
-                Marker(
-                  markerId: MarkerId("_currentLocation"),
-                  icon: BitmapDescriptor.defaultMarker,
-                  position: _currentP!,
+          : Stack(
+              children: [
+                GoogleMap(
+                  onMapCreated: ((GoogleMapController controller) =>
+                      _mapController.complete(controller)),
+                  initialCameraPosition: CameraPosition(
+                    target: _currentP!,
+                    zoom: 17,
+                  ),
+                  markers: {
+                    Marker(
+                      markerId: MarkerId("_currentLocation"),
+                      icon: BitmapDescriptor.defaultMarker,
+                      position: _currentP!,
+                    ),
+                  },
                 ),
-                Marker(
-                    markerId: MarkerId("_sourceLocation"),
-                    icon: BitmapDescriptor.defaultMarker,
-                    position: _pGooglePlex),
-                Marker(
-                    markerId: MarkerId("_destinationLocation"),
-                    icon: BitmapDescriptor.defaultMarker,
-                    position: _pApplePark)
-              },
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  child: ElevatedButton(
+                    onPressed: _reportCase,
+                    child: Text('Report Case'),
+                  ),
+                ),
+              ],
             ),
+    );
+  }
+
+  void _reportCase() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Report Case'),
+        content: TextField(
+          decoration: InputDecoration(hintText: 'Enter case details...'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Case Reported. Thank you for your report.'),
+                ),
+              );
+            },
+            child: Text('Confirm'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -71,7 +115,7 @@ class _NearbyNewsState extends State<NearbyNews> {
     final GoogleMapController controller = await _mapController.future;
     CameraPosition _newCameraPosition = CameraPosition(
       target: pos,
-      zoom: 13,
+      zoom: 15,
     );
     await controller.animateCamera(
       CameraUpdate.newCameraPosition(_newCameraPosition),
@@ -110,13 +154,20 @@ class _NearbyNewsState extends State<NearbyNews> {
     });
   }
 
+  Future<BitmapDescriptor> _getMarkerIcon() async {
+    ByteData byteData = await rootBundle.load('assets/nearby.png');
+    Uint8List list = byteData.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(list);
+  }
+
   Future<List<LatLng>> getPolyLinePoints() async {
     List<LatLng> polylineCoordinates = [];
     PolylinePoints polylinePoints = PolylinePoints();
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       GOOGLE_MAPS_API_KEY,
       PointLatLng(_pGooglePlex.latitude, _pGooglePlex.longitude),
-      PointLatLng(_pApplePark.latitude, _pApplePark.longitude),
+      PointLatLng(_currentP!.latitude, _currentP!.longitude),
       travelMode: TravelMode.driving,
     );
     if (result.points.isNotEmpty) {
