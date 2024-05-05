@@ -29,7 +29,6 @@ apply plugin:'kotlin-android'
 android {
     namespace "com.example.fyp"
     compileSdkVersion flutter.compileSdkVersion
-    //ndkVersion "21.3.6528147"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -54,7 +53,7 @@ android {
         applicationId "com.example.fyp"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -87,11 +86,12 @@ flutter {
 
 
 
+
+
 dependencies {
     implementation 'com.android.support:multidex:1.0.3'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
     implementation("com.google.firebase:firebase-analytics")
     implementation 'org.tensorflow:tensorflow-lite:2.8.0'
-    //implementation project(':flutter_unity_widget')
 }

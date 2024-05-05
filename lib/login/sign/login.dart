@@ -94,6 +94,15 @@ class _LogInState extends State<LogIn> {
           ),
         ));
       }
+    } catch (e) {
+      // Handle other errors, e.g., no internet connection
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.red,
+        content: Text(
+          "An error occurred. Please check your internet connection and try again.",
+          style: TextStyle(fontSize: 18.0),
+        ),
+      ));
     }
   }
 
@@ -212,21 +221,21 @@ class _LogInState extends State<LogIn> {
                 child: Text("Forgot Password?",
                     style: GoogleFonts.ubuntu(
                         color: const Color(0xFF8c8e98),
-                        fontSize: 18.0,
+                        fontSize: 16.0,
                         fontWeight: FontWeight.w500)),
               ),
               const SizedBox(
-                height: 40.0,
+                height: 25.0,
               ),
               Text(
                 "or LogIn with",
                 style: GoogleFonts.ubuntu(
                     color: const Color(0xFF273671),
-                    fontSize: 22.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.w500),
               ),
               const SizedBox(
-                height: 30.0,
+                height: 20.0,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -259,7 +268,7 @@ class _LogInState extends State<LogIn> {
                 ],
               ),
               const SizedBox(
-                height: 40.0,
+                height: 20.0,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

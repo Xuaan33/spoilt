@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fyp/allergies.dart';
+import 'package:fyp/profile/allergies.dart';
 
 class Setting extends StatefulWidget {
   const Setting({Key? key});

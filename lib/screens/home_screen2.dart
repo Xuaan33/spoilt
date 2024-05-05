@@ -8,6 +8,7 @@ import 'package:fyp/screens/nearby_news.dart';
 import 'package:fyp/screens/profile.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class HomeScreen2 extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -21,6 +22,7 @@ class HomeScreen2 extends StatefulWidget {
 class _HomeScreen2State extends State<HomeScreen2> {
   int _currentIndex = 0;
   late Timer _timer;
+  bool _isCarouselInteracting = false;
 
   final List<String> _backgrounds = [
     'assets/bg2.jpg',
@@ -32,11 +34,7 @@ class _HomeScreen2State extends State<HomeScreen2> {
   void initState() {
     super.initState();
     _startTimer();
-    fetchRecentHistory().then((history) {
-      setState(() {
-        recentHistory = history;
-      });
-    });
+    fetchRecentHistory();
   }
 
   @override
@@ -47,10 +45,19 @@ class _HomeScreen2State extends State<HomeScreen2> {
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      setState(() {
-        _currentIndex = (_currentIndex + 1) % _backgrounds.length;
-      });
+      if (!_isCarouselInteracting) {
+        setState(() {
+          _currentIndex = (_currentIndex + 1) % _backgrounds.length;
+        });
+      }
     });
+  }
+
+  String _extractTimestamp(String timestamp) {
+    // Assuming timestamp is in milliseconds since epoch
+    int millisecondsSinceEpoch = int.tryParse(timestamp) ?? 0;
+    return DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch)
+        .toString();
   }
 
   Future<List<Map<String, dynamic>>> fetchRecentHistory() async {
@@ -85,6 +92,10 @@ class _HomeScreen2State extends State<HomeScreen2> {
         break; // Stop iterating once we have 5 items
       }
     }
+
+    setState(() {
+      recentHistory = fetchedHistory;
+    });
 
     return fetchedHistory;
   }
@@ -142,97 +153,109 @@ class _HomeScreen2State extends State<HomeScreen2> {
                 ),
               ],
             ),
-            CarouselSlider(
-              options: CarouselOptions(
-                height: 200,
-                autoPlay: true,
-                enlargeCenterPage: true,
-                viewportFraction: 0.8,
-              ),
-              items: _backgrounds.asMap().entries.map((entry) {
-                int index = entry.key;
-                String image = entry.value;
+            Listener(
+              onPointerDown: (_) {
+                setState(() {
+                  _isCarouselInteracting = true;
+                });
+              },
+              onPointerUp: (_) {
+                setState(() {
+                  _isCarouselInteracting = false;
+                });
+              },
+              child: CarouselSlider(
+                options: CarouselOptions(
+                  height: 200,
+                  autoPlay: true,
+                  enlargeCenterPage: true,
+                  viewportFraction: 0.8,
+                ),
+                items: _backgrounds.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  String image = entry.value;
 
-                String text = '';
-                switch (index) {
-                  case 0:
-                    text = "Let's Spot some Food!";
-                    break;
-                  case 1:
-                    text =
-                        "Have you done setting up your Profile?\nRemember to Set it Up";
-                    break;
-                  case 2:
-                    text =
-                        "Did you meet some Food Related Cases?\nNo worries, Let us help you with that.";
-                    break;
-                  default:
-                    text = '';
-                }
+                  String text = '';
+                  switch (index) {
+                    case 0:
+                      text = "Let's Spot some Food!";
+                      break;
+                    case 1:
+                      text =
+                          "Have you done setting up your Profile?\nRemember to Set it Up";
+                      break;
+                    case 2:
+                      text =
+                          "Did you meet some Food Related Cases?\nNo worries, Let us help you with that.";
+                      break;
+                    default:
+                      text = '';
+                  }
 
-                return Builder(
-                  builder: (BuildContext context) {
-                    return Container(
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        color: Colors.amber,
-                        image: DecorationImage(
-                          image: AssetImage(image),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            text,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.ubuntu(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  return Builder(
+                    builder: (BuildContext context) {
+                      return Container(
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          color: Colors.amber,
+                          image: DecorationImage(
+                            image: AssetImage(image),
+                            fit: BoxFit.cover,
                           ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (_currentIndex == 0) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FoodAR(),
-                                  ),
-                                );
-                              } else if (_currentIndex == 1) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Profile(),
-                                  ),
-                                );
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => NearbyNews(),
-                                  ),
-                                );
-                              }
-                            },
-                            child: Text(
-                              'Go',
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              text,
+                              textAlign: TextAlign.center,
                               style: GoogleFonts.ubuntu(
-                                color: Colors.black,
-                                fontSize: 16,
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              }).toList(),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                if (_currentIndex == 0) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => FoodAR(),
+                                    ),
+                                  );
+                                } else if (_currentIndex == 1) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Profile(),
+                                    ),
+                                  );
+                                } else if (_currentIndex == 2) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => NearbyNews(),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Text(
+                                'Go',
+                                style: GoogleFonts.ubuntu(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
             ),
             const SizedBox(height: 16),
             Padding(
@@ -271,14 +294,17 @@ class _HomeScreen2State extends State<HomeScreen2> {
             SizedBox(
               height: 200,
               child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: fetchRecentHistory(),
+                future: Future.value(recentHistory),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
-                    final recentHistory = snapshot.data!;
+                    final recentHistory = snapshot.data as List<
+                        Map<String,
+                            dynamic>>; // Cast the snapshot data to the correct type
+
                     return ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: recentHistory.length,
@@ -301,7 +327,8 @@ class _HomeScreen2State extends State<HomeScreen2> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const SizedBox(height: 8),
-                                      Text('Timestamp: ${data['timestamp']}'),
+                                      Text(
+                                          '${timeago.format(DateTime.parse(_extractTimestamp(data['timestamp'])))}'),
                                       if (data['imageUrl'].isNotEmpty)
                                         Image.asset(data['imageUrl']!),
                                       if (data['prediction']
@@ -335,9 +362,14 @@ class _HomeScreen2State extends State<HomeScreen2> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
+                                  Image.asset(
+                                    'assets/${data['prediction'].toString().toLowerCase().replaceAll(' ', '')}.png',
+                                    height: 100, // Adjust the height as needed
+                                  ),
+                                  const SizedBox(height: 8),
                                   Text(
-                                    'Recent Spotting ${index + 1}',
-                                    style: const TextStyle(
+                                    'Spotted: ${data['prediction']}',
+                                    style: GoogleFonts.ubuntu(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),

@@ -5,11 +5,11 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fyp/about.dart';
-import 'package:fyp/allergies.dart';
+import 'package:fyp/profile/about.dart';
+import 'package:fyp/profile/allergies.dart';
 import 'package:fyp/login/sign/login.dart';
 import 'package:fyp/profile_menu.dart';
-import 'package:fyp/settings.dart';
+import 'package:fyp/profile/settings.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -187,7 +187,7 @@ class _ProfileState extends State<Profile> {
           // Upload the selected image to Firestore
           await FirebaseFirestore.instance
               .collection('Users')
-              .doc(user.uid) // Use user.uid to get the current user's ID
+              .doc(user.uid)
               .update({'imgUrl': pickedImage.path});
         }
       }

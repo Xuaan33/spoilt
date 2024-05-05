@@ -4,6 +4,7 @@ import 'package:fyp/screens/home_screen2.dart';
 import 'package:fyp/service/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SettingsProfile extends StatefulWidget {
   const SettingsProfile({Key? key}) : super(key: key);
@@ -31,152 +32,245 @@ class _SettingsProfileState extends State<SettingsProfile> {
   ];
 
   final _formKey = GlobalKey<FormState>();
+  late PageController _pageController;
   int _currentStep = 0; // Track the current step
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 0);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text('Settings Profile'),
-      ),
-      body: Form(
-        key: _formKey,
-        child: Stepper(
-          currentStep: _currentStep,
-          onStepContinue: () {
-            setState(() {
-              if (_currentStep < 3) {
-                _currentStep += 1;
-              } else {
-                _saveProfile(context);
-              }
-            });
-          },
-          onStepCancel: () {
-            setState(() {
-              if (_currentStep > 0) {
-                _currentStep -= 1;
-              }
-            });
-          },
-          steps: [
-            Step(
-              title: Text('Welcome'),
-              content: AnimatedOpacity(
-                duration: Duration(milliseconds: 500),
-                opacity: _currentStep == 0 ? 1.0 : 0.0,
-                child: Text('Welcome to Spoilt!'),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height - kToolbarHeight,
+              child: PageView(
+                controller: _pageController,
+                physics: NeverScrollableScrollPhysics(),
+                children: [
+                  _buildWelcomeScreen(),
+                  _buildNameScreen(),
+                  _buildBirthDateScreen(),
+                  _buildAllergiesScreen(),
+                ],
               ),
             ),
-            Step(
-              title: Text('Your Name'),
-              content: AnimatedOpacity(
-                duration: Duration(milliseconds: 500),
-                opacity: _currentStep == 1 ? 1.0 : 0.0,
-                child: TextFormField(
-                  decoration: InputDecoration(labelText: 'Name'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      name = value;
-                    });
-                  },
-                ),
-              ),
-            ),
-            Step(
-              title: Text('Your Birth Date'),
-              content: AnimatedOpacity(
-                duration: Duration(milliseconds: 500),
-                opacity: _currentStep == 2 ? 1.0 : 0.0,
-                child: GestureDetector(
-                  onTap: () async {
-                    DateTime? selectedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (selectedDate != null) {
-                      setState(() {
-                        birthDate = selectedDate;
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      decoration: InputDecoration(labelText: 'Birth Date'),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your birth date';
-                        }
-                        return null;
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (_currentStep > 0)
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _currentStep -= 1;
+                          _pageController.previousPage(
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.ease,
+                          );
+                        });
                       },
-                      controller: TextEditingController(
-                        text: birthDate != null
-                            ? '${birthDate!.day}/${birthDate!.month}/${birthDate!.year}'
-                            : '',
-                      ),
+                      child: Text('Back'),
                     ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_currentStep < 3) {
+                        setState(() {
+                          _currentStep += 1;
+                          _pageController.nextPage(
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.ease,
+                          );
+                        });
+                      } else {
+                        _saveProfile(context);
+                      }
+                    },
+                    child: Text(_currentStep < 3 ? 'Continue' : "Let's GO!"),
                   ),
-                ),
-              ),
-            ),
-            Step(
-              title: Text('Your Allergies'),
-              content: AnimatedOpacity(
-                duration: Duration(milliseconds: 500),
-                opacity: _currentStep == 3 ? 1.0 : 0.0,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Select Allergies'),
-                    Wrap(
-                      children: allAllergies.map((allergy) {
-                        return FilterChip(
-                          label: Text(allergy),
-                          selected: selectedAllergies.contains(allergy),
-                          onSelected: (selected) {
-                            setState(() {
-                              if (selected) {
-                                selectedAllergies.add(allergy);
-                                if (allergy == 'Others' || allergy == 'None') {
-                                  allergies = '';
-                                  otherAllergyController.clear();
-                                }
-                              } else {
-                                selectedAllergies.remove(allergy);
-                              }
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    if (selectedAllergies.contains('Others'))
-                      TextFormField(
-                        controller: otherAllergyController,
-                        decoration: InputDecoration(
-                          labelText: 'Other Allergies',
-                          hintText: 'Enter other allergies separated by commas',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            allergies = value;
-                          });
-                        },
-                      ),
-                  ],
-                ),
+                ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeScreen() {
+    return Container(
+      color: Colors.orange[100],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/welcome.png', // Replace with the actual path to your image
+            width: 200, // Adjust the width as needed
+            height: 200, // Adjust the height as needed
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Welcome to Spoilt!',
+            style:
+                GoogleFonts.ubuntu(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNameScreen() {
+    return Container(
+      color: Colors.orange[200],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset('assets/name.png'),
+          const SizedBox(height: 16),
+          Text(
+            'What should call you?',
+            style:
+                GoogleFonts.ubuntu(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: TextFormField(
+              decoration: InputDecoration(labelText: 'Name'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your name';
+                }
+                return null;
+              },
+              onChanged: (value) {
+                setState(() {
+                  name = value;
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBirthDateScreen() {
+    return Container(
+      color: Color.fromARGB(255, 255, 206, 150),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset('assets/dob.png'),
+          Text(
+            'Your Birth Date',
+            style:
+                GoogleFonts.ubuntu(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16),
+          GestureDetector(
+            onTap: () async {
+              DateTime? selectedDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(1900),
+                lastDate: DateTime.now(),
+              );
+              if (selectedDate != null) {
+                setState(() {
+                  birthDate = selectedDate;
+                });
+              }
+            },
+            child: AbsorbPointer(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Birth Date',
+                    hintText: birthDate != null
+                        ? '${birthDate!.day}/${birthDate!.month}/${birthDate!.year}'
+                        : 'Select birth date',
+                  ),
+                  enabled: false,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAllergiesScreen() {
+    return Container(
+      color: Color.fromARGB(255, 250, 152, 152),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset('assets/allergies.png'),
+          Text(
+            'Your Allergies',
+            style:
+                GoogleFonts.ubuntu(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Select Allergies'),
+                Wrap(
+                  children: allAllergies.map((allergy) {
+                    return FilterChip(
+                      label: Text(allergy),
+                      selected: selectedAllergies.contains(allergy),
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            selectedAllergies.add(allergy);
+                            if (allergy == 'Others' || allergy == 'None') {
+                              allergies = '';
+                              otherAllergyController.clear();
+                            }
+                          } else {
+                            selectedAllergies.remove(allergy);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+                if (selectedAllergies.contains('Others'))
+                  TextFormField(
+                    controller: otherAllergyController,
+                    decoration: InputDecoration(
+                      labelText: 'Other Allergies',
+                      hintText: 'Enter other allergies separated by commas',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        allergies = value;
+                      });
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -225,6 +319,12 @@ class _SettingsProfileState extends State<SettingsProfile> {
       }
     } else {
       print('form is invalid');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill in all required fields.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 }
