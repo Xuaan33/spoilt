@@ -23,10 +23,12 @@ class _HistoryState extends State<History> {
   }
 
   Future<void> fetchHistory() async {
+    print('Fetching history from Firebase Storage...');
     final ListResult result =
         await FirebaseStorage.instance.ref('History').listAll();
     final items = result.items;
 
+    print('Clearing predictions and storageItems lists...');
     predictions.clear(); // Clear the predictions list before fetching new data
     storageItems.clear(); // Clear the storageItems list
 
@@ -35,6 +37,7 @@ class _HistoryState extends State<History> {
       final String extension = item.name.split('.').last;
 
       if (extension == 'txt') {
+        print('Fetching data for ${item.name}...');
         final textData = await item.getData();
         if (textData != null) {
           final prediction = utf8.decode(textData);
@@ -65,6 +68,7 @@ class _HistoryState extends State<History> {
         }
       }
     }
+    print('Finished fetching history.');
     setState(() {});
   }
 

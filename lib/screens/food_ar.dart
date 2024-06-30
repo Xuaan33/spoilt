@@ -168,15 +168,33 @@ class _FoodARState extends State<FoodAR> {
     }
   }
 
-  // Define a method channel
-  static const platform = MethodChannel('com.example.flutterunitywidget');
+  // Future<void> savePrediction(String prediction) async {
+  //   try {
+  //     final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+  //     final String userId = _currentUser.uid;
+  //     final String fileName = '$timestamp.txt';
+  //     final String filePath =
+  //         'History/$userId/$fileName'; // Specify the full path including user ID
+  //     final Reference storageReference =
+  //         FirebaseStorage.instance.ref().child(filePath);
 
-  // Method to send prediction to Unity
-  Future<void> sendPredictionToUnity(String prediction) async {
-    try {
-      await platform.invokeMethod('sendPrediction', {'prediction': prediction});
-    } catch (e) {
-      print('Error sending prediction to Unity: $e');
-    }
-  }
+  //     await storageReference.putData(utf8.encode(
+  //         'Prediction: $prediction\nUserID: $userId\nTimestamp: $timestamp'));
+  //     print('Prediction saved successfully.');
+  //   } catch (e) {
+  //     print('Error saving prediction: $e');
+  //   }
+  // }
+
+  // // Define a method channel
+  // static const platform = MethodChannel('com.example.flutterunitywidget');
+
+  // // Method to send prediction to Unity
+  // Future<void> sendPredictionToUnity(String prediction) async {
+  //   try {
+  //     await platform.invokeMethod('sendPrediction', {'prediction': prediction});
+  //   } catch (e) {
+  //     print('Error sending prediction to Unity: $e');
+  //   }
+  // }
 }

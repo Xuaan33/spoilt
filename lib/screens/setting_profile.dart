@@ -14,11 +14,12 @@ class SettingsProfile extends StatefulWidget {
 }
 
 class _SettingsProfileState extends State<SettingsProfile> {
-  String name = '';
+  String? name;
   DateTime? birthDate;
   String allergies = '';
   List<String> selectedAllergies = [];
   TextEditingController otherAllergyController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
 
   final List<String> allAllergies = [
     'Peanuts',
@@ -51,59 +52,62 @@ class _SettingsProfileState extends State<SettingsProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height - kToolbarHeight,
-              child: PageView(
-                controller: _pageController,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  _buildWelcomeScreen(),
-                  _buildNameScreen(),
-                  _buildBirthDateScreen(),
-                  _buildAllergiesScreen(),
-                ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              SizedBox(
+                height: MediaQuery.of(context).size.height - kToolbarHeight,
+                child: PageView(
+                  controller: _pageController,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: [
+                    _buildWelcomeScreen(),
+                    _buildNameScreen(),
+                    _buildBirthDateScreen(),
+                    _buildAllergiesScreen(),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (_currentStep > 0)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (_currentStep > 0)
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _currentStep -= 1;
+                            _pageController.previousPage(
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.ease,
+                            );
+                          });
+                        },
+                        child: Text('Back'),
+                      ),
                     ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          _currentStep -= 1;
-                          _pageController.previousPage(
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.ease,
-                          );
-                        });
+                        if (_currentStep < 3) {
+                          setState(() {
+                            _currentStep += 1;
+                            _pageController.nextPage(
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.ease,
+                            );
+                          });
+                        } else {
+                          _saveProfile(context);
+                        }
                       },
-                      child: Text('Back'),
+                      child: Text(_currentStep < 3 ? 'Continue' : "Let's GO!"),
                     ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_currentStep < 3) {
-                        setState(() {
-                          _currentStep += 1;
-                          _pageController.nextPage(
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.ease,
-                          );
-                        });
-                      } else {
-                        _saveProfile(context);
-                      }
-                    },
-                    child: Text(_currentStep < 3 ? 'Continue' : "Let's GO!"),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -144,11 +148,12 @@ class _SettingsProfileState extends State<SettingsProfile> {
             style:
                 GoogleFonts.ubuntu(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextFormField(
-              decoration: InputDecoration(labelText: 'Name'),
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Name'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your name';
@@ -184,7 +189,7 @@ class _SettingsProfileState extends State<SettingsProfile> {
             onTap: () async {
               DateTime? selectedDate = await showDatePicker(
                 context: context,
-                initialDate: DateTime.now(),
+                initialDate: birthDate ?? DateTime.now(),
                 firstDate: DateTime(1900),
                 lastDate: DateTime.now(),
               );
@@ -194,18 +199,36 @@ class _SettingsProfileState extends State<SettingsProfile> {
                 });
               }
             },
-            child: AbsorbPointer(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Birth Date',
-                    hintText: birthDate != null
-                        ? '${birthDate!.day}/${birthDate!.month}/${birthDate!.year}'
-                        : 'Select birth date',
-                  ),
-                  enabled: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Birth Date',
+                  hintText: birthDate != null
+                      ? '${birthDate!.day}/${birthDate!.month}/${birthDate!.year}'
+                      : 'Select birth date',
                 ),
+                readOnly: true, // Make the TextFormField read-only
+                onTap: () async {
+                  // Show the date picker when the TextFormField is tapped
+                  DateTime? selectedDate = await showDatePicker(
+                    context: context,
+                    initialDate: birthDate ?? DateTime.now(),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                  );
+                  if (selectedDate != null) {
+                    setState(() {
+                      birthDate = selectedDate;
+                    });
+                  }
+                },
+                validator: (value) {
+                  if (birthDate == null) {
+                    return 'Please select a birth date';
+                  }
+                  return null;
+                },
               ),
             ),
           ),
@@ -257,7 +280,7 @@ class _SettingsProfileState extends State<SettingsProfile> {
                 if (selectedAllergies.contains('Others'))
                   TextFormField(
                     controller: otherAllergyController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Other Allergies',
                       hintText: 'Enter other allergies separated by commas',
                     ),
@@ -284,7 +307,7 @@ class _SettingsProfileState extends State<SettingsProfile> {
         if (userId != null) {
           Map<String, dynamic> userData = {
             'email': user.email,
-            'name': name.isNotEmpty ? name : null,
+            'name': name?.isNotEmpty == true ? name : null,
             'imgUrl': user.photoURL,
             'id': userId,
             'birthDate': birthDate,

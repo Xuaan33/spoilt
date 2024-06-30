@@ -359,22 +359,25 @@ class _HomeScreen2State extends State<HomeScreen2> {
                           child: Card(
                             child: SizedBox(
                               width: 150,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/${data['prediction'].toString().toLowerCase().replaceAll(' ', '')}.png',
-                                    height: 100, // Adjust the height as needed
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Spotted: ${data['prediction']}',
-                                    style: GoogleFonts.ubuntu(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/${data['prediction'].toString().toLowerCase().replaceAll(' ', '')}.png',
+                                      height:
+                                          100, // Adjust the height as needed
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Spotted: ${data['prediction']}',
+                                      style: GoogleFonts.ubuntu(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
