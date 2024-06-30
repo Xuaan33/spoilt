@@ -1,16 +1,18 @@
-# fyp
+# SPOILT
 
-A new Flutter project.
+My Final Year Project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This project is a Flutter developed application to Inpection Food Freshness.
 
-A few resources to get you started if this is your first Flutter project:
+The main function of this application to Spot the freshness of certain raw food. 
+For current, I had included 5 types of fruits/vegetables namely:
+1. Apples
+2. Banana
+3. Oranges
+4. Carrots
+5. Tomato
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+There are still some bugs on the directory of Storage at Firebase Storage.
